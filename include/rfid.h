@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Arduino.h"
+#include "rfidReader.h"
 
 class Logic;
+
+#define NR_OF_READERS   5
 
 class Rfid {
   public:
@@ -10,7 +13,7 @@ class Rfid {
     void setup();
     void handle();
     bool solved = false;
-    bool rfidState[5] = {false};
+    RFID_STATE state[NR_OF_READERS];
 
   private:
     Logic &_logic;

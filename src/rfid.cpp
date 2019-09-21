@@ -5,10 +5,8 @@
 #include <MFRC522.h>
 
 #define RST_PIN    9
-#define NR_OF_READERS   5
 byte ssPins[] =  { 16, 17, 14, 10, 15 };
-RfidReader readers[NR_OF_READERS];
-RFID_STATE state[NR_OF_READERS];
+RfidReader reader[NR_OF_READERS];
 
 // TODO: should be stored in EEPROM and ability to update via serial
 byte tags[][4] = {
@@ -26,8 +24,8 @@ Rfid::Rfid(Logic &logic)
 
 void Rfid::setup() {  
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    readers[i].setup(ssPins[i], RST_PIN, tags[i]);
-    state[i] = readers[i].state;
+    reader[i].setup(ssPins[i], RST_PIN, tags[i]);
+    state[i] = reader[i].state;
   }
 
   Serial.println("\nReady to Scan...");
@@ -37,16 +35,18 @@ void Rfid::handle() {
 
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
 
-    readers[i].handle();
+    reader[i].handle();
 
-    if (state[i] != readers[i].state) {
+    if (state[i] != reader[i].state) {
       Serial.print("state changed for ");
       Serial.print(i);
       Serial.print("  ");
       Serial.print(state[i]);
       Serial.print(" => ");
-      Serial.print(readers[i].state);
-      state[i] = readers[i].state;
+      Serial.println(reader[i].state);
+
+      state[i] = reader[i].state;
+      _logic.status();
     }
 
     // if (getID(i)) {
@@ -85,7 +85,7 @@ bool Rfid::compareIDs(byte idOne[], byte idTwo[] ) {
 void Rfid::checkForPuzzleSolved() {
   bool allFound = true;
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    allFound = allFound && rfidState[i];
+    allFound = allFound && state[i] == CORRECT;
   }
 
   if (allFound) {
