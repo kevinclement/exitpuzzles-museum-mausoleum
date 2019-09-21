@@ -31,19 +31,6 @@ Lights::Lights(Logic &logic)
 {  
 }
 
-// void Lights::on() {
-//   lights_on = true;
-// }
-
-// void Lights::allOn() {
-//   ledcWrite(CHANNEL, 255);
-// }
-
-// void Lights::off() {
-//   ledcWrite(CHANNEL, 0);
-//   lights_on = false;
-// }
-
 void Lights::setup() {
   SPI.begin();
   tlc.begin();
