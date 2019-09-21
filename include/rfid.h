@@ -9,7 +9,7 @@ class Rfid {
     Rfid(Logic &logic);
     void setup();
     void handle();
-
+    void checkForIdol(uint8_t);
     bool solved = false;
     bool rfidState[5] = {false};
 
