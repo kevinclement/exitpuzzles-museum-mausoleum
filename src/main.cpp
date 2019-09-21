@@ -28,6 +28,7 @@ void readAnySerialMessage() {
 
 void setup() {
   Serial.begin(9600);
+  Serial.setTimeout(10);
   Serial.println("Museum mausoleum idol control by kevinc...\n");
 
   logic.setup();

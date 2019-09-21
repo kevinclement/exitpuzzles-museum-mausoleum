@@ -68,5 +68,7 @@ void Lights::checkBlink() {
 }
 
 void Lights::blink() {
+  blink_on = 0;
+  blink_count = 0;
   blink_off = millis();
 }
