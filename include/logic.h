@@ -1,9 +1,8 @@
 #pragma once
 
 #include "lights.h"
+#include "rfid.h"
 
-// #include "serialmanager.h"
-// #include "rfid.h"
 // #include "lightsensors.h"
 // #include "sound.h"
 
@@ -11,8 +10,8 @@ class Logic {
 public:
   Logic();
   Lights lights;
-  // SerialManager serial;
-  // Rfid rfid;
+  Rfid rfid;
+
   // LightSensors lightsensors;
   // Sound sound;
 

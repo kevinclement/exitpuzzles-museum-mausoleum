@@ -13,26 +13,31 @@ bool stopped_all = false;
 // {
 // }
 
-Logic::Logic() : lights(*this)
+Logic::Logic() : 
+  lights(*this),
+  rfid(*this)
 {
 }
 
+bool _solved = false;
 void Logic::setup() {
-  // serial.setup("");
-
   lights.setup();
+  rfid.setup();
 
-  // rfid.setup();
   // lightsensors.setup();
   // sound.setup();
 }
 
 void Logic::handle() {
   lights.handle();
+  rfid.handle();
 
-  // serial.handle();
+  if (rfid.solved && !_solved) {
+    Serial.println("*** ALL IDOLS IN PLACE ***");
+    lights.blink();
+  }
+
   // lightsensors.handle();
-  // rfid.handle();
 
   // if (lightsensors.lightDetected && solved_at == 0) {
   //   solved();

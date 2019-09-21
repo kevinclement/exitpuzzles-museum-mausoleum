@@ -1,3 +1,8 @@
+#include "Arduino.h"
+#include "rfid.h"
+#include "logic.h"
+#include <MFRC522.h>
+
 // RFID pins
 #define SS_PIN_1  16
 #define SS_PIN_2  17
@@ -6,16 +11,6 @@
 #define SS_PIN_5  15
 
 #define RST_PIN    9
-
-void checkBlink();
-void resetAll();
-void blink();
-void checkForPuzzleSolved();
-uint8_t getID(uint8_t reader);
-bool isMaster(byte id[]);
-bool isIdol(byte id[], uint8_t reader);
-void printID(byte id[]);
-bool compareIDs(byte idOne[], byte idTwo[] );
 
 #define NR_OF_READERS   5
 byte ssPins[] =  { SS_PIN_1, SS_PIN_2, SS_PIN_3, SS_PIN_4, SS_PIN_5 };
@@ -26,9 +21,8 @@ bool rfidState[] = { false, false, false, false, false };
 
 byte readCard[4];                                // Stores scanned ID read from RFID Module
 byte masterCard[4] = { 0xA9, 0x9A, 0xBB, 0x55 }; // Stores master card's ID read from EEPROM
-bool unlocked = false;
 
-// TMP: TODO: store in EEPROM
+// TODO: should be stored in EEPROM and ability to update via serial
 byte tags[][4] = {
   { 0xA7, 0x86, 0x8A, 0xF2 },
   { 0xF7, 0x81, 0x8A, 0xF2 }, 
@@ -37,16 +31,12 @@ byte tags[][4] = {
   { 0x97, 0x6F, 0x8C, 0xF2 },
 };
 
-byte original_tags[][4] = {
-  { 0x89, 0x72, 0xA1, 0x55 },
-  { 0x52, 0xB4, 0x25, 0x1C }, 
-  { 0x12, 0x4B, 0x57, 0x1C },
-  { 0x09, 0x20, 0x92, 0x55 },
-  { 0x76, 0x61, 0x93, 0x1A },
-};
+Rfid::Rfid(Logic &logic)
+: _logic(logic)
+{
+}
 
-void setup() {
-  
+void Rfid::setup() {  
   // Pull Up SS lines
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
     pinMode(ssPins[i], OUTPUT);  
@@ -55,7 +45,6 @@ void setup() {
   delay(1);
 
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    //mfrc522[i].PCD_SetAntennaGain(mfrc522[i].RxGain_max);
     mfrc522[i].PCD_Init(ssPins[i], RST_PIN);
     Serial.print("Reader ");
     Serial.print(i);
@@ -68,17 +57,12 @@ void setup() {
   Serial.println("\nReady to Scan...");
 }
 
-void loop() {
-
+void Rfid::handle() {
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
 
     if (getID(i)) {
-      if (isMaster(readCard)) {       
-        Serial.print("MASTER from reader ");
-        Serial.println(i);
-        resetAll();      
-      } else if (isIdol(readCard, i)) {
-        if (!unlocked) { 
+      if (isIdol(readCard, i)) {
+        if (!solved) { 
           Serial.print("IDOL: ");
           Serial.println(i + 1);
           rfidState[i] = true;
@@ -95,31 +79,7 @@ void loop() {
   }
 }
 
-void resetAll() {
-  for (uint8_t i = 0; i < NR_OF_READERS; i++) {   
-    rfidState[i] = false;
-  }
-  
-  unlocked = false;
-  blink_on = 0;
-  blink_off = 0;
-  blink_count = 0;
-}
-
-void checkForPuzzleSolved() {
-  bool solved = true;
-  for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    solved = solved && rfidState[i];
-  }
-
-  if (solved) {
-    Serial.println("*** ALL IDOLS IN PLACE, OPENING LOCK ***");
-    blink();
-    unlocked = true;
-  }
-}
-
-uint8_t getID(uint8_t reader) {
+uint8_t Rfid::getID(uint8_t reader) {
   // Getting ready for Reading PICCs
   if (!mfrc522[reader].PICC_IsNewCardPresent()) {
     return 0;
@@ -139,26 +99,33 @@ uint8_t getID(uint8_t reader) {
   return 1;
 }
 
-bool isMaster(byte id[]) {
-  return compareIDs(id, masterCard);
-}
-
-bool isIdol(byte id[], uint8_t reader) {
+bool Rfid::isIdol(byte id[], uint8_t reader) {
   return compareIDs(id, tags[reader]);
 }
 
-void printID(byte id[]) {
+void Rfid::printID(byte id[]) {
   for ( uint8_t i = 0; i < 4; i++) {  //
     Serial.print(id[i] < 0x10 ? "0" : "");
     Serial.print(id[i], HEX);
   }
 }
 
-bool compareIDs(byte idOne[], byte idTwo[] ) {   
+bool Rfid::compareIDs(byte idOne[], byte idTwo[] ) {   
   for ( uint8_t k = 0; k < 4; k++ ) {
     if ( idOne[k] != idTwo[k] ) {
        return false;
     }
   }
   return true;  
+}
+
+void Rfid::checkForPuzzleSolved() {
+  bool allFound = true;
+  for (uint8_t i = 0; i < NR_OF_READERS; i++) {
+    allFound = allFound && rfidState[i];
+  }
+
+  if (allFound) {
+    solved = true;
+  }
 }

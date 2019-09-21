@@ -1,7 +1,6 @@
 #include "Arduino.h"
 #include "lights.h"
 #include <SPI.h>
-#include <MFRC522.h>
 #include <Adafruit_TLC5947.h>
 
 // LEDs didn't map proper to indexes, so I need a lookup
