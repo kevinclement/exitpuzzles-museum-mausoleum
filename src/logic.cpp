@@ -1,7 +1,6 @@
 #include "Arduino.h"
 #include "logic.h"
 #include "consts.h"
-#include <SPI.h>
 
 unsigned long solved_at = 0;
 bool stopped_all = false;
@@ -9,7 +8,6 @@ bool stopped_all = false;
 // Logic::Logic() 
 //   : serial(),
 //     rfid(*this),
-//     lights(*this),
 //     lightsensors(*this),
 //     sound(*this)
 // {
@@ -22,16 +20,18 @@ Logic::Logic() : lights(*this)
 void Logic::setup() {
   // serial.setup("");
 
+  lights.setup();
+
   // rfid.setup();
-  // lights.setup();
   // lightsensors.setup();
   // sound.setup();
 }
 
 void Logic::handle() {
+  lights.handle();
+
   // serial.handle();
   // lightsensors.handle();
-  // lights.handle();
   // rfid.handle();
 
   // if (lightsensors.lightDetected && solved_at == 0) {

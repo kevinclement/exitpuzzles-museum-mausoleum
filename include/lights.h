@@ -10,10 +10,12 @@ class Lights {
     void setup();
     void handle();
 
+    void blink();
     // void on();
     // void off();
     // void allOn();
 
   private:
     Logic &_logic;
+    void checkBlink();
 };
