@@ -11,7 +11,7 @@ byte ssPins[] =  { 16, 17, 14, 10, 15 };
 
 // RFID controller
 MFRC522 mfrc522[NR_OF_READERS];
-RfidReader rdr;
+RfidReader readers[NR_OF_READERS];
 
 byte readCard[4];                                // Stores scanned ID read from RFID Module
 byte masterCard[4] = { 0xA9, 0x9A, 0xBB, 0x55 }; // Stores master card's ID read from EEPROM
@@ -31,58 +31,36 @@ Rfid::Rfid(Logic &logic)
 }
 
 void Rfid::setup() {  
-  // Pull Up SS lines
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    pinMode(ssPins[i], OUTPUT);  
-    digitalWrite(ssPins[i], HIGH);
-  }
-  delay(1);
-
-  for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    if (i == 2) {
-      rdr.setup(ssPins[i], RST_PIN);
-    } else {
-      mfrc522[i].PCD_Init(ssPins[i], RST_PIN);
-      Serial.print("Reader ");
-      Serial.print(i);
-      Serial.print(": Pin: ");
-      Serial.print(ssPins[i]);
-      Serial.print(" => ");
-      mfrc522[i].PCD_DumpVersionToSerial();
-    }
+    readers[i].setup(ssPins[i], RST_PIN);
   }
 
   Serial.println("\nReady to Scan...");
 }
 
 void Rfid::handle() {
-  
 
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    // TMP: IGNORE FOR TEST
-    // DONT CHECK THIS IN
-    if (i==2) {
-      rdr.check();
-      continue;
-    }
 
-    if (getID(i)) {
-      if (isIdol(readCard, i)) {
-        if (!solved) { 
-          Serial.print("IDOL: ");
-          Serial.println(i + 1);
-          rfidState[i] = true;
-          checkForPuzzleSolved();
-          _logic.status();
-        }
-      } else { 
-        Serial.print("UNKNOWN tag ");
-        printID(readCard);
-        Serial.print(" on reader ");
-        Serial.print(i);
-        Serial.println(".");
-      }
-    }
+    readers[i].check();
+
+    // if (getID(i)) {
+    //   if (isIdol(readCard, i)) {
+    //     if (!solved) { 
+    //       Serial.print("IDOL: ");
+    //       Serial.println(i + 1);
+    //       rfidState[i] = true;
+    //       checkForPuzzleSolved();
+    //       _logic.status();
+    //     }
+    //   } else { 
+    //     Serial.print("UNKNOWN tag ");
+    //     printID(readCard);
+    //     Serial.print(" on reader ");
+    //     Serial.print(i);
+    //     Serial.println(".");
+    //   }
+    // }
   }
 }
 
