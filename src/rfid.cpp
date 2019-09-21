@@ -68,13 +68,6 @@ void Rfid::handle() {
         Serial.print(i);
         Serial.println(".");
       }
-    } else {
-      if (rfidState[i]) {
-        Serial.print("Removed idol ");
-        Serial.println(i);
-        rfidState[i]= false;
-        _logic.status();
-      }
     }
   }
 }
