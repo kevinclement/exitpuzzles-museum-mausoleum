@@ -21,8 +21,14 @@ void readAnySerialMessage() {
     Serial.println("blinking lights now...");
     logic.lights.blink();
   }
+  else if (msg == "solve" || msg == "v") {
+    logic.solved();
+  }
   else if (msg == "reset" || msg == "r") {
     resetFunc();
+  } else {
+    Serial.print("unknown command: ");
+    Serial.println(msg);
   }
 }
 
