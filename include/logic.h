@@ -17,11 +17,10 @@ public:
 
   void setup();
   void handle();
-  void printVariables();
-  void solved();  
+  void solved();
+  void status();
 
 private:
-  void readStoredVariables();
   
 };
 
