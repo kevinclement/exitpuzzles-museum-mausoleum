@@ -38,7 +38,12 @@ void Rfid::handle() {
 
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
 
-    readers[i].check();
+    readers[i].handle();
+
+    if (i == 2) {
+      Serial.print("state: ");
+      Serial.println(readers[i].state);
+    }
 
     // if (getID(i)) {
     //   if (isIdol(readCard, i)) {

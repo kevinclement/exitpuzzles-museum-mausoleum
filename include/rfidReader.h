@@ -3,11 +3,15 @@
 #include "Arduino.h"
 #include <MFRC522.h>
 
+enum RFID_STATE {INCORRECT, CORRECT, MISSING, UNKNOWN};
+
 class RfidReader {
   public:
     RfidReader();
+
     void setup(uint8_t pin, uint8_t rst, byte t[4]);
-    bool check();
+    void handle();
+    RFID_STATE state = UNKNOWN;
 
   private:
     bool compareTags();
@@ -16,9 +20,7 @@ class RfidReader {
 
     MFRC522 mfr;
     byte tag[4];
-
-    byte readCard[4];                                // Stores scanned ID read from RFID Module
-    byte masterCard[4] = { 0xA9, 0x9A, 0xBB, 0x55 }; // Stores master card's ID read from EEPROM
+    byte readCard[4];
 
     bool rfid_tag_present_prev = false;
     bool rfid_tag_present = false;

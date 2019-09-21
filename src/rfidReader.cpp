@@ -24,7 +24,7 @@ void RfidReader::setup(uint8_t pin, uint8_t rst, byte t[4]) {
   tag[3] = t[3];
 }
 
-bool RfidReader::check() {
+void RfidReader::handle() {
   rfid_tag_present_prev = rfid_tag_present;
 
   _rfid_error_counter += 1;
@@ -61,14 +61,14 @@ bool RfidReader::check() {
   
   // rising edge
   if (rfid_tag_present && !rfid_tag_present_prev){
-    Serial.println("Tag found");
-    Serial.println("checking against known");
-    Serial.println(compareTags());
+    Serial.println("Tag found, checking...");
+    state = compareTags() ? CORRECT : INCORRECT;
   }
-  
+
   // falling edge
   if (!rfid_tag_present && rfid_tag_present_prev){
     Serial.println("Tag gone");
+    state = MISSING;
   }
 }
 
