@@ -11,6 +11,7 @@ class Rfid {
     void handle();
 
     bool solved = false;
+    bool rfidState[5] = {false};
 
   private:
     Logic &_logic;

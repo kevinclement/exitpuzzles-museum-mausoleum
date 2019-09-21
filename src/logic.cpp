@@ -33,5 +33,15 @@ void Logic::solved() {
 void Logic::status() {
   Serial.print("status=solved:");
   Serial.print(_solved ? "true" : "false");
+  Serial.print(",idol_1:");
+  Serial.print(rfid.rfidState[0] ? "true" : "false");
+  Serial.print(",idol_2:");
+  Serial.print(rfid.rfidState[1] ? "true" : "false");
+  Serial.print(",idol_3:");
+  Serial.print(rfid.rfidState[2] ? "true" : "false");
+  Serial.print(",idol_4:");
+  Serial.print(rfid.rfidState[3] ? "true" : "false");
+  Serial.print(",idol_5:");
+  Serial.print(rfid.rfidState[4] ? "true" : "false");
   Serial.println();
 }

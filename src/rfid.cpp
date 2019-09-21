@@ -3,21 +3,13 @@
 #include "logic.h"
 #include <MFRC522.h>
 
-// RFID pins
-#define SS_PIN_1  16
-#define SS_PIN_2  17
-#define SS_PIN_3  14
-#define SS_PIN_4  10
-#define SS_PIN_5  15
-
 #define RST_PIN    9
 
 #define NR_OF_READERS   5
-byte ssPins[] =  { SS_PIN_1, SS_PIN_2, SS_PIN_3, SS_PIN_4, SS_PIN_5 };
+byte ssPins[] =  { 16, 17, 14, 10, 15 };
 
 // RFID controller
 MFRC522 mfrc522[NR_OF_READERS];
-bool rfidState[] = { false, false, false, false, false };
 
 byte readCard[4];                                // Stores scanned ID read from RFID Module
 byte masterCard[4] = { 0xA9, 0x9A, 0xBB, 0x55 }; // Stores master card's ID read from EEPROM
@@ -67,6 +59,7 @@ void Rfid::handle() {
           Serial.println(i + 1);
           rfidState[i] = true;
           checkForPuzzleSolved();
+          _logic.status();
         }
       } else { 
         Serial.print("UNKNOWN tag ");
