@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <SPI.h>
 #include <MFRC522.h>
 #include <Adafruit_TLC5947.h>
@@ -11,16 +10,6 @@
 #define SS_PIN_5  15
 
 #define RST_PIN    9
-
-void checkBlink();
-void resetAll();
-void blink();
-void checkForPuzzleSolved();
-uint8_t getID(uint8_t reader);
-bool isMaster(byte id[]);
-bool isIdol(byte id[], uint8_t reader);
-void printID(byte id[]);
-bool compareIDs(byte idOne[], byte idTwo[] );
 
 #define NR_OF_READERS   5
 byte ssPins[] =  { SS_PIN_1, SS_PIN_2, SS_PIN_3, SS_PIN_4, SS_PIN_5 };
@@ -74,15 +63,6 @@ byte original_tags[][4] = {
   { 0x76, 0x61, 0x93, 0x1A },
 };
 
-// TODO: 
-//   [ ] unlock door wired
-//   [ ] play mp3
-//   [ ] install speaker
-//   [ ] program other pedastool to show color of idol
-//   [ ] bug with reset when they are all on the pedastal
-
-//   [ ] master card programming mode
-
 void setup() {
   Serial.begin(9600);
   Serial.println("Mausoleum idol control by kevinc...\n");
@@ -135,7 +115,7 @@ void readAnySerialMessage() {
       }
   }
  
-  if (command == "blink" || command == "b") {
+  if (command == "blink") {
     Serial.println("blinking lights now...");
     blink();
   }
@@ -189,17 +169,14 @@ void checkBlink() {
   
   // only blink off for small ammount of time, then turn them back on  
   if (blink_off > 0 && millis() - blink_off > BLINK_DURATION) {
-    Serial.println("blinking off");
     blink_off = 0;
 
     if (blink_count < BLINK_MAX - 1) {
-      Serial.println("blinking back on");
       blink_on = millis();
       blink_count++;
     }
   }
   else if (blink_on > 0 && millis() - blink_on > BLINK_DURATION) {
-    Serial.println("blink off set again");
     blink_on = 0;
     blink_off = millis();
   }

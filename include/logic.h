@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SerialManager.h"
-#include "actuator.h"
+#include "serialmanager.h"
+#include "rfid.h"
 #include "lights.h"
 #include "lightsensors.h"
 #include "sound.h"
@@ -10,7 +10,7 @@ class Logic {
 public:
   Logic();
   SerialManager serial;
-  Actuator actuator;
+  Rfid rfid;
   Lights lights;
   LightSensors lightsensors;
   Sound sound;

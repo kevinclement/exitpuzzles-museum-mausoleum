@@ -1,0 +1,14 @@
+#include "Arduino.h"
+#include "serialmanager.h"
+#include "logic.h"
+
+SerialManager::SerialManager(Logic &logic)
+: _logic(logic)
+{
+}
+
+void SerialManager::setup() {
+}
+
+void SerialManager::handle() {
+}

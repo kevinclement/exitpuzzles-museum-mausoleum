@@ -7,7 +7,7 @@ bool stopped_all = false;
 
 Logic::Logic() 
   : serial(),
-    actuator(*this),
+    rfid(*this),
     lights(*this),
     lightsensors(*this),
     sound(*this)
@@ -15,34 +15,29 @@ Logic::Logic()
 }
 
 void Logic::setup() {
-  serial.setup("ExitMuseumMummy");
+  serial.setup("");
 
-  actuator.setup();
+  rfid.setup();
   lights.setup();
   lightsensors.setup();
   sound.setup();
-
-  // trigger a close, if its already closed then noop
-  // if this is a reset, then close here will do the actual close
-  actuator.close();
 }
 
 void Logic::handle() {
   serial.handle();
   lightsensors.handle();
   lights.handle();
-  actuator.handle();
+  rfid.handle();
 
   if (lightsensors.lightDetected && solved_at == 0) {
     solved();
   }
 
-  if (!stopped_all && solved_at != 0 && actuator.opened) {
-    serial.print("All done with lights and music!\n");
-    sound.stop();
-    lights.off();
-    stopped_all = true;
-  }
+  
+    // serial.print("All done with lights and music!\n");
+    // sound.stop();
+    // lights.off();
+    // stopped_all = true;
 }
 
 void Logic::solved() {
@@ -50,7 +45,6 @@ void Logic::solved() {
 
   sound.play();
   lights.on();
-  actuator.open();
 
   solved_at = millis();
   status();
