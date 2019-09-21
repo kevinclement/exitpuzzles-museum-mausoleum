@@ -68,17 +68,14 @@ void Lights::checkBlink() {
   
   // only blink off for small ammount of time, then turn them back on  
   if (blink_off > 0 && millis() - blink_off > BLINK_DURATION) {
-    Serial.println("blinking off");
     blink_off = 0;
 
     if (blink_count < BLINK_MAX - 1) {
-      Serial.println("blinking back on");
       blink_on = millis();
       blink_count++;
     }
   }
   else if (blink_on > 0 && millis() - blink_on > BLINK_DURATION) {
-    Serial.println("blink off set again");
     blink_on = 0;
     blink_off = millis();
   }
