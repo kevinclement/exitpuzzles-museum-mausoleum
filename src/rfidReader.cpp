@@ -5,7 +5,7 @@ RfidReader::RfidReader()
 {
 }
 
-void RfidReader::setup(uint8_t pin, uint8_t rst) {
+void RfidReader::setup(uint8_t pin, uint8_t rst, byte t[4]) {
 
   // Pull Up SS
   pinMode(pin, OUTPUT);
@@ -17,6 +17,11 @@ void RfidReader::setup(uint8_t pin, uint8_t rst) {
   Serial.print(pin);
   Serial.print(" => ");
   mfr.PCD_DumpVersionToSerial();
+
+  tag[0] = t[0];
+  tag[1] = t[1];
+  tag[2] = t[2];
+  tag[3] = t[3];
 }
 
 bool RfidReader::check() {
@@ -47,10 +52,9 @@ bool RfidReader::check() {
     _rfid_error_counter = 0;
     _tag_found = true;
 
-    // TODO: copy
-    // for ( uint8_t i = 0; i < 4; i++) {
-    //   readCard[i] = mfr.uid.uidByte[i];
-    // }
+    for ( uint8_t i = 0; i < 4; i++) {
+       readCard[i] = mfr.uid.uidByte[i];
+    }
   }
 
   rfid_tag_present = _tag_found;
@@ -58,12 +62,48 @@ bool RfidReader::check() {
   // rising edge
   if (rfid_tag_present && !rfid_tag_present_prev){
     Serial.println("Tag found");
-    // Serial.println("checking against known");
-    // Serial.println(isIdol(readCard, idolIndex));
+    Serial.println("checking against known");
+    Serial.println(compareTags());
   }
   
   // falling edge
   if (!rfid_tag_present && rfid_tag_present_prev){
     Serial.println("Tag gone");
   }
+}
+
+bool RfidReader::compareTags() {
+  for ( uint8_t k = 0; k < 4; k++ ) {
+    if ( readCard[k] != tag[k] ) {
+       return false;
+    }
+  }
+  return true;
+}
+
+void RfidReader::printID(byte id[]) {
+  for ( uint8_t i = 0; i < 4; i++) {  //
+    Serial.print(id[i] < 0x10 ? "0" : "");
+    Serial.print(id[i], HEX);
+  }
+}
+
+uint8_t RfidReader::legacyGetID(uint8_t reader) {
+  // Getting ready for Reading PICCs
+  if (!mfr.PICC_IsNewCardPresent()) {
+    return 0;
+  }
+  if (!mfr.PICC_ReadCardSerial()) {
+    return 0;
+  }
+
+  for ( uint8_t i = 0; i < 4; i++) {  //
+    readCard[i] = mfr.uid.uidByte[i];
+  }
+
+  // Stop reading
+  mfr.PICC_HaltA();
+  mfr.PCD_StopCrypto1();
+
+  return 1;
 }

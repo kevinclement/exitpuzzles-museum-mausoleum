@@ -5,16 +5,12 @@
 #include <MFRC522.h>
 
 #define RST_PIN    9
-
 #define NR_OF_READERS   5
 byte ssPins[] =  { 16, 17, 14, 10, 15 };
 
 // RFID controller
 MFRC522 mfrc522[NR_OF_READERS];
 RfidReader readers[NR_OF_READERS];
-
-byte readCard[4];                                // Stores scanned ID read from RFID Module
-byte masterCard[4] = { 0xA9, 0x9A, 0xBB, 0x55 }; // Stores master card's ID read from EEPROM
 
 // TODO: should be stored in EEPROM and ability to update via serial
 byte tags[][4] = {
@@ -32,7 +28,7 @@ Rfid::Rfid(Logic &logic)
 
 void Rfid::setup() {  
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    readers[i].setup(ssPins[i], RST_PIN);
+    readers[i].setup(ssPins[i], RST_PIN, tags[i]);
   }
 
   Serial.println("\nReady to Scan...");
@@ -64,35 +60,8 @@ void Rfid::handle() {
   }
 }
 
-uint8_t Rfid::getID(uint8_t reader) {
-  // Getting ready for Reading PICCs
-  if (!mfrc522[reader].PICC_IsNewCardPresent()) {
-    return 0;
-  }
-  if (!mfrc522[reader].PICC_ReadCardSerial()) {
-    return 0;
-  }
-
-  for ( uint8_t i = 0; i < 4; i++) {  //
-    readCard[i] = mfrc522[reader].uid.uidByte[i];
-  }
-
-  // Stop reading
-  mfrc522[reader].PICC_HaltA();
-  mfrc522[reader].PCD_StopCrypto1();
-  
-  return 1;
-}
-
 bool Rfid::isIdol(byte id[], uint8_t reader) {
   return compareIDs(id, tags[reader]);
-}
-
-void Rfid::printID(byte id[]) {
-  for ( uint8_t i = 0; i < 4; i++) {  //
-    Serial.print(id[i] < 0x10 ? "0" : "");
-    Serial.print(id[i], HEX);
-  }
 }
 
 bool Rfid::compareIDs(byte idOne[], byte idTwo[] ) {   
