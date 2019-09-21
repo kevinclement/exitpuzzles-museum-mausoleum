@@ -7,10 +7,8 @@
 #define RST_PIN    9
 #define NR_OF_READERS   5
 byte ssPins[] =  { 16, 17, 14, 10, 15 };
-
-// RFID controller
-MFRC522 mfrc522[NR_OF_READERS];
 RfidReader readers[NR_OF_READERS];
+RFID_STATE state[NR_OF_READERS];
 
 // TODO: should be stored in EEPROM and ability to update via serial
 byte tags[][4] = {
@@ -29,6 +27,7 @@ Rfid::Rfid(Logic &logic)
 void Rfid::setup() {  
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
     readers[i].setup(ssPins[i], RST_PIN, tags[i]);
+    state[i] = readers[i].state;
   }
 
   Serial.println("\nReady to Scan...");
@@ -40,9 +39,14 @@ void Rfid::handle() {
 
     readers[i].handle();
 
-    if (i == 2) {
-      Serial.print("state: ");
-      Serial.println(readers[i].state);
+    if (state[i] != readers[i].state) {
+      Serial.print("state changed for ");
+      Serial.print(i);
+      Serial.print("  ");
+      Serial.print(state[i]);
+      Serial.print(" => ");
+      Serial.print(readers[i].state);
+      state[i] = readers[i].state;
     }
 
     // if (getID(i)) {
