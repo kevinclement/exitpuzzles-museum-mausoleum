@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "rfid.h"
 #include "logic.h"
+#include "rfidReader.h"
 #include <MFRC522.h>
 
 #define RST_PIN    9
@@ -10,6 +11,7 @@ byte ssPins[] =  { 16, 17, 14, 10, 15 };
 
 // RFID controller
 MFRC522 mfrc522[NR_OF_READERS];
+RfidReader rdr;
 
 byte readCard[4];                                // Stores scanned ID read from RFID Module
 byte masterCard[4] = { 0xA9, 0x9A, 0xBB, 0x55 }; // Stores master card's ID read from EEPROM
@@ -37,69 +39,20 @@ void Rfid::setup() {
   delay(1);
 
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    mfrc522[i].PCD_Init(ssPins[i], RST_PIN);
-    Serial.print("Reader ");
-    Serial.print(i);
-    Serial.print(": Pin: ");
-    Serial.print(ssPins[i]);
-    Serial.print(" => ");
-    mfrc522[i].PCD_DumpVersionToSerial();
+    if (i == 2) {
+      rdr.setup(ssPins[i], RST_PIN);
+    } else {
+      mfrc522[i].PCD_Init(ssPins[i], RST_PIN);
+      Serial.print("Reader ");
+      Serial.print(i);
+      Serial.print(": Pin: ");
+      Serial.print(ssPins[i]);
+      Serial.print(" => ");
+      mfrc522[i].PCD_DumpVersionToSerial();
+    }
   }
 
   Serial.println("\nReady to Scan...");
-}
-
-bool rfid_tag_present_prev = false;
-bool rfid_tag_present = false;
-int _rfid_error_counter = 0;
-bool _tag_found = false;
-void Rfid::checkForIdol(uint8_t idolIndex) {
-
-  rfid_tag_present_prev = rfid_tag_present;
-
-  _rfid_error_counter += 1;
-  if(_rfid_error_counter > 2){
-    _tag_found = false;
-  }
-
-  // Detect Tag without looking for collisions
-  byte bufferATQA[2];
-  byte bufferSize = sizeof(bufferATQA);
-
-  // Reset baud rates
-  mfrc522[idolIndex].PCD_WriteRegister(mfrc522[idolIndex].TxModeReg, 0x00);
-  mfrc522[idolIndex].PCD_WriteRegister(mfrc522[idolIndex].RxModeReg, 0x00);
-
-  // Reset ModWidthReg
-  mfrc522[idolIndex].PCD_WriteRegister(mfrc522[idolIndex].ModWidthReg, 0x26);
-
-  MFRC522::StatusCode result = mfrc522[idolIndex].PICC_RequestA(bufferATQA, &bufferSize);
-
-  if(result == mfrc522[idolIndex].STATUS_OK){
-    if ( ! mfrc522[idolIndex].PICC_ReadCardSerial()) { //Since a PICC placed get Serial and continue   
-      return;
-    }
-    _rfid_error_counter = 0;
-    _tag_found = true;
-
-    for ( uint8_t i = 0; i < 4; i++) {
-      readCard[i] = mfrc522[idolIndex].uid.uidByte[i];
-    }
-  }
-
-  rfid_tag_present = _tag_found;
-  
-  // rising edge
-  if (rfid_tag_present && !rfid_tag_present_prev){
-    Serial.println("Tag found");
-    Serial.println("checking against known");
-    Serial.println(isIdol(readCard, idolIndex));
-  }
-  
-  // falling edge
-  if (!rfid_tag_present && rfid_tag_present_prev){
-    Serial.println("Tag gone");
-  }
 }
 
 void Rfid::handle() {
@@ -109,7 +62,7 @@ void Rfid::handle() {
     // TMP: IGNORE FOR TEST
     // DONT CHECK THIS IN
     if (i==2) {
-      checkForIdol(i);
+      rdr.check();
       continue;
     }
 
