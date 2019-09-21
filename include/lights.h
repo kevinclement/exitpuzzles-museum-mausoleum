@@ -10,9 +10,9 @@ class Lights {
     void setup();
     void handle();
 
-    void on();
-    void off();
-    void allOn();
+    // void on();
+    // void off();
+    // void allOn();
 
   private:
     Logic &_logic;
