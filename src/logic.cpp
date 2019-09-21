@@ -23,9 +23,6 @@ bool _solved = false;
 void Logic::setup() {
   lights.setup();
   rfid.setup();
-
-  // lightsensors.setup();
-  // sound.setup();
 }
 
 void Logic::handle() {
@@ -33,8 +30,7 @@ void Logic::handle() {
   rfid.handle();
 
   if (rfid.solved && !_solved) {
-    Serial.println("*** ALL IDOLS IN PLACE ***");
-    lights.blink();
+    solved();
   }
 
   // lightsensors.handle();
@@ -51,19 +47,14 @@ void Logic::handle() {
 }
 
 void Logic::solved() {
-  // serial.print("Solved!\n");
-
-  // sound.play();
-  // lights.on();
-
-  // solved_at = millis();
-  // status();
+  Serial.println("*** ALL IDOLS IN PLACE ***");
+  lights.blink();
+  _solved = true;
+  status();
 }
 
 void Logic::status() {
-  // serial.print(
-  //   "status=solved:%s"
-  //   "%s",
-  //   solved_at > 0 ? "true" : "false",
-  //   CRLF);
+  Serial.print("status=solved:");
+  Serial.print(_solved ? "true" : "false");
+  Serial.println();
 }

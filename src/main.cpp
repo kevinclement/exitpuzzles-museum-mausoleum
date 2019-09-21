@@ -32,6 +32,7 @@ void setup() {
   Serial.println("Museum mausoleum idol control by kevinc...\n");
 
   logic.setup();
+  logic.status();
 }
 
 void loop() {
