@@ -74,6 +74,7 @@ bool Rfid::compareIDs(byte idOne[], byte idTwo[] ) {
 }
 
 void Rfid::checkForPuzzleSolved() {
+  solved = true;
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
     solved = solved && state[i] == CORRECT;
   }
