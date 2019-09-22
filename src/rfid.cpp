@@ -40,7 +40,7 @@ void Rfid::handle() {
     if (state[i] != reader[i].state) {
       Serial.print("state changed for ");
       Serial.print(i + 1);
-      Serial.print("  ");
+      Serial.print(" ");
       Serial.print(prettyState(state[i]));
       Serial.print(" => ");
       Serial.println(prettyState(reader[i].state));
