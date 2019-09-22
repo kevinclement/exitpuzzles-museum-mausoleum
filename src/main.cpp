@@ -24,7 +24,7 @@ void readAnySerialMessage() {
   else if (msg == "solve" || msg == "v") {
     logic.solved();
   }
-  else if (msg == "reset" || msg == "r") {
+  else if (msg == "reset" || msg == "reboot" || msg == "r") {
     resetFunc();
   } else {
     Serial.print("unknown command: ");
