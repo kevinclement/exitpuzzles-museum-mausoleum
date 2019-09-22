@@ -1,18 +1,12 @@
 #include "Arduino.h"
 #include "rfid.h"
 #include "logic.h"
+#include "rfidReader.h"
 #include <MFRC522.h>
 
 #define RST_PIN    9
-
-#define NR_OF_READERS   5
 byte ssPins[] =  { 16, 17, 14, 10, 15 };
-
-// RFID controller
-MFRC522 mfrc522[NR_OF_READERS];
-
-byte readCard[4];                                // Stores scanned ID read from RFID Module
-byte masterCard[4] = { 0xA9, 0x9A, 0xBB, 0x55 }; // Stores master card's ID read from EEPROM
+RfidReader reader[NR_OF_READERS];
 
 // TODO: should be stored in EEPROM and ability to update via serial
 byte tags[][4] = {
@@ -29,78 +23,45 @@ Rfid::Rfid(Logic &logic)
 }
 
 void Rfid::setup() {  
-  // Pull Up SS lines
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    pinMode(ssPins[i], OUTPUT);  
-    digitalWrite(ssPins[i], HIGH);
-  }
-  delay(1);
-
-  for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    mfrc522[i].PCD_Init(ssPins[i], RST_PIN);
-    Serial.print("Reader ");
-    Serial.print(i);
-    Serial.print(": Pin: ");
-    Serial.print(ssPins[i]);
-    Serial.print(" => ");
-    mfrc522[i].PCD_DumpVersionToSerial();
+    reader[i].setup(ssPins[i], RST_PIN, tags[i]);
+    state[i] = reader[i].state;
   }
 
   Serial.println("\nReady to Scan...");
 }
 
 void Rfid::handle() {
+
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
 
-    if (getID(i)) {
-      if (isIdol(readCard, i)) {
-        if (!solved) { 
-          Serial.print("IDOL: ");
-          Serial.println(i + 1);
-          rfidState[i] = true;
-          checkForPuzzleSolved();
-          _logic.status();
-        }
-      } else { 
-        Serial.print("UNKNOWN tag ");
-        printID(readCard);
-        Serial.print(" on reader ");
-        Serial.print(i);
-        Serial.println(".");
-      }
+    reader[i].handle();
+
+    if (state[i] != reader[i].state) {
+      Serial.print("state changed for ");
+      Serial.print(i + 1);
+      Serial.print(" ");
+      Serial.print(prettyState(state[i]));
+      Serial.print(" => ");
+      Serial.println(prettyState(reader[i].state));
+
+      state[i] = reader[i].state;
+      checkForPuzzleSolved();
+      _logic.status();
     }
-  }
-}
 
-uint8_t Rfid::getID(uint8_t reader) {
-  // Getting ready for Reading PICCs
-  if (!mfrc522[reader].PICC_IsNewCardPresent()) {
-    return 0;
+    //     Serial.print("UNKNOWN tag ");
+    //     printID(readCard);
+    //     Serial.print(" on reader ");
+    //     Serial.print(i);
+    //     Serial.println(".");
+    //   }
+    // }
   }
-  if (!mfrc522[reader].PICC_ReadCardSerial()) {
-    return 0;
-  }
-
-  for ( uint8_t i = 0; i < 4; i++) {  //
-    readCard[i] = mfrc522[reader].uid.uidByte[i];
-  }
-
-  // Stop reading
-  mfrc522[reader].PICC_HaltA();
-  mfrc522[reader].PCD_StopCrypto1();
-  
-  return 1;
 }
 
 bool Rfid::isIdol(byte id[], uint8_t reader) {
   return compareIDs(id, tags[reader]);
-}
-
-void Rfid::printID(byte id[]) {
-  for ( uint8_t i = 0; i < 4; i++) {  //
-    Serial.print(id[i] < 0x10 ? "0" : "");
-    Serial.print(id[i], HEX);
-  }
 }
 
 bool Rfid::compareIDs(byte idOne[], byte idTwo[] ) {   
@@ -109,16 +70,20 @@ bool Rfid::compareIDs(byte idOne[], byte idTwo[] ) {
        return false;
     }
   }
-  return true;  
+  return true;
 }
 
 void Rfid::checkForPuzzleSolved() {
-  bool allFound = true;
+  solved = true;
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    allFound = allFound && rfidState[i];
+    solved = solved && state[i] == CORRECT;
   }
+}
 
-  if (allFound) {
-    solved = true;
-  }
+String Rfid::prettyState(uint8_t state) {
+  return 
+    state == INCORRECT ? "Incorrect" : 
+    state == CORRECT ? "Correct" : 
+    state == MISSING ? "Missing" : 
+    "Unknown";
 }
