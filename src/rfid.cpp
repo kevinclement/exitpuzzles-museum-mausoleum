@@ -54,9 +54,6 @@ void Rfid::handle() {
     //     printID(readCard);
     //     Serial.print(" on reader ");
     //     Serial.print(i);
-    //     Serial.println(".");
-    //   }
-    // }
   }
 }
 
