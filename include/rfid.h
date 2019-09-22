@@ -21,4 +21,5 @@ class Rfid {
     bool isIdol(byte id[], uint8_t reader);
     bool compareIDs(byte idOne[], byte idTwo[]);
     void checkForPuzzleSolved();
+    String prettyState(uint8_t);
 };

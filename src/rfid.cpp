@@ -93,7 +93,7 @@ void Rfid::checkForPuzzleSolved() {
   }
 }
 
-String prettyState(uint8_t state) {
+String Rfid::prettyState(uint8_t state) {
   return 
     state == INCORRECT ? "Incorrect" : 
     state == CORRECT ? "Correct" : 
