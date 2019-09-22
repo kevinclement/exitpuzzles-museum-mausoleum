@@ -46,19 +46,10 @@ void Rfid::handle() {
       Serial.println(prettyState(reader[i].state));
 
       state[i] = reader[i].state;
+      checkForPuzzleSolved();
       _logic.status();
     }
 
-    // if (getID(i)) {
-    //   if (isIdol(readCard, i)) {
-    //     if (!solved) { 
-    //       Serial.print("IDOL: ");
-    //       Serial.println(i + 1);
-    //       rfidState[i] = true;
-    //       checkForPuzzleSolved();
-    //       _logic.status();
-    //     }
-    //   } else { 
     //     Serial.print("UNKNOWN tag ");
     //     printID(readCard);
     //     Serial.print(" on reader ");
@@ -83,13 +74,8 @@ bool Rfid::compareIDs(byte idOne[], byte idTwo[] ) {
 }
 
 void Rfid::checkForPuzzleSolved() {
-  bool allFound = true;
   for (uint8_t i = 0; i < NR_OF_READERS; i++) {
-    allFound = allFound && state[i] == CORRECT;
-  }
-
-  if (allFound) {
-    solved = true;
+    solved = solved && state[i] == CORRECT;
   }
 }
 
