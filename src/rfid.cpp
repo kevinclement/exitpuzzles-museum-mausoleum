@@ -41,9 +41,9 @@ void Rfid::handle() {
       Serial.print("state changed for ");
       Serial.print(i + 1);
       Serial.print("  ");
-      Serial.print(state[i]);
+      Serial.print(prettyState(state[i]));
       Serial.print(" => ");
-      Serial.println(reader[i].state);
+      Serial.println(prettyState(reader[i].state));
 
       state[i] = reader[i].state;
       _logic.status();
@@ -91,4 +91,12 @@ void Rfid::checkForPuzzleSolved() {
   if (allFound) {
     solved = true;
   }
+}
+
+String prettyState(uint8_t state) {
+  return 
+    state == INCORRECT ? "Incorrect" : 
+    state == CORRECT ? "Correct" : 
+    state == MISSING ? "Missing" : 
+    "Unknown";
 }
