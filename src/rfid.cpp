@@ -79,7 +79,7 @@ bool Rfid::compareIDs(byte idOne[], byte idTwo[] ) {
        return false;
     }
   }
-  return true;  
+  return true;
 }
 
 void Rfid::checkForPuzzleSolved() {
