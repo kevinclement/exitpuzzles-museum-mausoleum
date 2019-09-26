@@ -2,6 +2,7 @@
 #include "logic.h"
 #include "consts.h"
 #include "rfidReader.h"
+#include "version.h"
 
 bool _solved = false;
 Logic::Logic() : 
@@ -32,17 +33,33 @@ void Logic::solved() {
 }
 
 void Logic::status() {
-  Serial.print("status=solved:");
-  Serial.print(_solved ? "true" : "false");
-  Serial.print(",idol_1:");
-  Serial.print(rfid.state[0] == CORRECT ? "true" : "false");
-  Serial.print(",idol_2:");
-  Serial.print(rfid.state[1] == CORRECT ? "true" : "false");
-  Serial.print(",idol_3:");
-  Serial.print(rfid.state[2] == CORRECT ? "true" : "false");
-  Serial.print(",idol_4:");
-  Serial.print(rfid.state[3] == CORRECT ? "true" : "false");
-  Serial.print(",idol_5:");
-  Serial.print(rfid.state[4] == CORRECT ? "true" : "false");
-  Serial.println();
+  char cMsg[254];
+  sprintf(cMsg, 
+    "status="
+      "version:%s,"
+      "gitDate:%s,"
+      "buildDate:%s,"
+
+      "solved:%s,"
+      "idol_1:%s,"
+      "idol_2:%s,"
+      "idol_3:%s,"
+      "idol_4:%s,"
+      "idol_5:%s"
+
+      "%s"
+    , GIT_HASH,
+      GIT_DATE,
+      DATE_NOW,
+
+      _solved ? "true" : "false",
+      rfid.state[0] == CORRECT ? "true" : "false",
+      rfid.state[1] == CORRECT ? "true" : "false",
+      rfid.state[2] == CORRECT ? "true" : "false",
+      rfid.state[3] == CORRECT ? "true" : "false",
+      rfid.state[4] == CORRECT ? "true" : "false",
+
+      CRLF);
+
+  Serial.print(cMsg);
 }
