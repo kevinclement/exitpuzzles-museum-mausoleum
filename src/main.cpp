@@ -24,6 +24,10 @@ void readAnySerialMessage() {
   else if (msg == "solve" || msg == "v") {
     logic.solved();
   }
+  else if (msg == "unsolvable" || msg == "n") {
+    Serial.println("toggling unsolvable now...");
+    logic.unsolvable();
+  }
   else if (msg == "reset" || msg == "reboot" || msg == "r") {
     resetFunc();
   } else {

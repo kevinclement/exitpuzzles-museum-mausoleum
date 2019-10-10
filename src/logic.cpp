@@ -21,7 +21,11 @@ void Logic::handle() {
   rfid.handle();
 
   if (rfid.solved && !_solved) {
-    solved();
+    if (_unsolvable) {
+      Serial.println("WARN: device was solved, but unsolvable flag is on, so ignoring.");
+    } else {
+      solved();
+    }
   }
 }
 
@@ -29,6 +33,11 @@ void Logic::solved() {
   Serial.println("*** ALL IDOLS IN PLACE ***");
   lights.blink();
   _solved = true;
+  status();
+}
+
+void Logic::unsolvable() {
+  _unsolvable = !_unsolvable;
   status();
 }
 
@@ -41,6 +50,7 @@ void Logic::status() {
       "buildDate:%s,"
 
       "solved:%s,"
+      "unsolvable:%s,"
       "idol_1:%s,"
       "idol_2:%s,"
       "idol_3:%s,"
@@ -53,6 +63,7 @@ void Logic::status() {
       DATE_NOW,
 
       _solved ? "true" : "false",
+      _unsolvable ? "true" : "false",
       rfid.state[0] == CORRECT ? "true" : "false",
       rfid.state[1] == CORRECT ? "true" : "false",
       rfid.state[2] == CORRECT ? "true" : "false",
