@@ -1,43 +1,25 @@
 #include "Arduino.h"
 #include "logic.h"
 #include "consts.h"
-#include "rfidReader.h"
 #include "version.h"
 
-bool _solved = false;
 Logic::Logic() : 
-  lights(*this),
-  rfid(*this)
+  lights(*this)
 {
 }
 
 void Logic::setup() {
   lights.setup();
-  rfid.setup();
 }
 
 void Logic::handle() {
   lights.handle();
-  rfid.handle();
-
-  if (rfid.solved && !_solved) {
-    if (_unsolvable) {
-      Serial.println("WARN: device was solved, but unsolvable flag is on, so ignoring.");
-    } else {
-      solved();
-    }
-  }
 }
 
 void Logic::solved() {
-  Serial.println("*** ALL IDOLS IN PLACE ***");
+  Serial.println("*** SOLVED ***");
   lights.blink();
   _solved = true;
-  status();
-}
-
-void Logic::unsolvable() {
-  _unsolvable = !_unsolvable;
   status();
 }
 
@@ -50,12 +32,6 @@ void Logic::status() {
       "buildDate:%s,"
 
       "solved:%s,"
-      "unsolvable:%s,"
-      "idol_1:%s,"
-      "idol_2:%s,"
-      "idol_3:%s,"
-      "idol_4:%s,"
-      "idol_5:%s"
 
       "%s"
     , GIT_HASH,
@@ -63,12 +39,6 @@ void Logic::status() {
       DATE_NOW,
 
       _solved ? "true" : "false",
-      _unsolvable ? "true" : "false",
-      rfid.state[0] == CORRECT ? "true" : "false",
-      rfid.state[1] == CORRECT ? "true" : "false",
-      rfid.state[2] == CORRECT ? "true" : "false",
-      rfid.state[3] == CORRECT ? "true" : "false",
-      rfid.state[4] == CORRECT ? "true" : "false",
 
       CRLF);
 
